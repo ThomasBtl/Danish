@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <style>
+        #output {
+            display: block;
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+ <div id="main">
+    <input id="roomName" />
+    <button onclick="join()">Join</button>
+    <textarea id="output">
+    </textarea>
+    <input disabled id="text" />
+    <button onclick="send()">Send</button>
+ </div>
+</body>
+<script type="text/javascript" charset="utf-8">
+let chatSocket = io('/chat');
+let roomInput = document.getElementById('roomName');
+let output = document.getElementById('output');
+let textInput = document.getElementById('text');
+
+function join(ev) {
+    chatSocket.emit('join', {room: roomInput.value });
+    document.getElementById('text').removeAttribute('disabled');
+}
+function send(ev) {
+    chatSocket.send(textInput.value);
+}
+
+chatSocket.on('message', data => {
+    output.value += `${data}\n`;
+})
+
+</script>
+</html>
