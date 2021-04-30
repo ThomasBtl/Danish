@@ -1,5 +1,7 @@
-#Card{
+.card{
+    position: absolute;
     height: 200px;
     width: 145px; /*Card ratio 1 by 0.72*/
     border: 1px solid black;
+    cursor: pointer;
 }
