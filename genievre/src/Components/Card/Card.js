@@ -1,39 +1,27 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import './Card.css';
 
-export default function Card(){
-    let  divX = 0,  divY = 0, mouseX = 0, mouseY = 0;
+export default function Card(props){
+    const [positions, setPositions] = useState({x : 0, y : 0})
+    useEffect(() => {
+        //[positions] - Set initial positions of the card once the component did mount
+        const positionsInfo = card.current.getBoundingClientRect()
+        setPositions({x : positionsInfo.x,
+                      y : positionsInfo.y
+                    });
+    },[]);
 
     const card = useRef(null);
 
-    function handleMouseDown(e){
-        e.preventDefault();
-
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-
-        card.current.onmouseup=handleMouseUp;
-        card.current.onmousemove=handleMouseMove;
-    }
-    
-    function handleMouseMove(e){
-        e.preventDefault();
-        divX = mouseX - e.clientX;
-        divY = mouseY - e.clientY;
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-
-        card.current.style.top = (card.current.offsetTop - divY) + "px";
-        card.current.style.left = (card.current.offsetLeft - divX) + "px"
-    }
-    
-    function handleMouseUp(e){
-        card.current.onmouseup = null;
-        card.current.onmousemove = null;
-    }
-
+    const uniqueClassName = 'card card-' + props.uid;
     return(
-        <div ref={card} onMouseDown={handleMouseDown} className="card">
+        <div 
+            ref={card}
+            onMouseDown={
+                props.onMouseDownHandler ? (e) => {props.onMouseDownHandler(e, card.current, positions)} : null
+            } 
+            className={uniqueClassName}
+        >
             <p>Assets here</p>
         </div>
     )
