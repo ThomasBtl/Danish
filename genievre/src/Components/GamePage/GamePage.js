@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useRef, useState} from 'react';
 import Hand from '../Hand/Hand';
 import Card from '../Card/Card';
 import ShitPile from '../ShitPile/ShitPile';
@@ -16,8 +16,8 @@ export default function Gamepage(){
     const CARDS = [<Card key={1} uid={1} onMouseDownHandler={cardMouseDownHandler}/>, <Card key={2} uid={2} onMouseDownHandler={cardMouseDownHandler}/>];
 
     //State keeping track of where the cards are
-    const [hand, setHand] = useState(CARDS)
-    const [shitPile, setShitPile] = useState([<Card key={3} uid={3} />])
+    const [hand, setHand] = useAsyncRef(CARDS)
+    const [shitPile, setShitPile] = useAsyncRef([<Card key={3} uid={3} />])
 
     //Card mouvement variables
     let mouseX = 0, mouseY = 0, deltaX = 0, deltaY = 0;
@@ -30,10 +30,14 @@ export default function Gamepage(){
      */
     function cardMouseDownHandler(e, cardElement, positions){
         e.preventDefault();
+        
+        cardElement.style.position = 'absolute';
 
         //get mouse click position
-        mouseX = e.clientX;
-        mouseY = e.clientY;
+        mouseX = e.clientX
+        mouseY = e.clientY
+
+        cardElement.style.zIndex = 9000;
 
         //set the handler for onmouseup (drop card) and onmousemove (move card around)
         cardElement.onmouseup = (e) => cardMouseUpHandler(e, cardElement, positions);
@@ -47,12 +51,12 @@ export default function Gamepage(){
      */
     function cardMouseDragHandler(e, cardElement){
         e.preventDefault();
-
+        
         //compute delta
         deltaX = mouseX - e.clientX;
         deltaY = mouseY - e.clientY;
-        mouseX = e.clientX;
-        mouseY = e.clientY;
+        mouseX = e.clientX
+        mouseY = e.clientY
 
         //move card with delta
         cardElement.style.top = (cardElement.offsetTop - deltaY) + 'px';
@@ -83,6 +87,9 @@ export default function Gamepage(){
         cardElement.style.left = `${positions.x}px`;
     }
 
+    /**
+     * @returns true if the mouse is over the shitpile while dropping the card, false otherwise
+     */
     function isCardOverShitPile(){
         const area = {
             x : shitPileRef.current.getBoundingClientRect().x,
@@ -93,34 +100,57 @@ export default function Gamepage(){
         return (mouseX >= area.x && mouseX <= area.xp && mouseY >= area.y && mouseY <= area.yp);
     }
 
+    /**
+     * Swap the card from the hand to the shit shit pile. This function is not really portable but right now it does the job.
+     * TODO : Redo it so we can swap the card from the hand to the shit pile but also from the shit pile to the hand. In later PR
+     * @param {String} classNameTarget the className of the card that is being moved
+     */
     function swapCardComponent(classNameTarget){
         const cardUid = parseInt(classNameTarget.split('-')[1])
-        const card = hand.find(c => c.props.uid === cardUid);
+        const card = hand.current.find(c => c.props.uid === cardUid);
         if(card){
-            const newHand = hand.filter(c => {
-                console.log(c.key)
-                console.log(card.key)
+            const newHand = hand.current.filter(c => {
                 return c.key !== card.key
             });
             const cardProps = card.props
-            //copy card
+            //Create a copy of the card but I don't remember why I need to do that xD
+            //TODO : Why do I need to do that ? xD
             const newCard = <Card  key={cardProps.uid} uid={cardProps.uid} />
             setHand(newHand);
-            setShitPile([...shitPile, newCard]);
+            setShitPile([newCard, ...shitPile.current]);
         }
-        //ERROR : Should not be there
+        else{
+            console.log("cannot be here !");
+        }
     }
 
     return(
         <div id="game-page">
-            <Hand
-                cards = {hand}
-                handRef = {handRef}
-            />
             <ShitPile 
                 shitPileRef = {shitPileRef}
-                cards = {shitPile}
+                cards = {shitPile.current}
+            />
+            <Hand
+                cards = {hand.current}
+                handRef = {handRef}
             />
         </div>
     )
+}
+
+/**
+ * Custom useState function that will conserved the hand state into a ref
+ * from : https://css-tricks.com/dealing-with-stale-props-and-states-in-reacts-functional-components
+ * @param {*} value The new value associated to the state
+ */
+function useAsyncRef(value){
+    const ref = useRef(value);
+    const [, forceRender] = useState(false);
+
+    function updateState(newState){
+        ref.current = newState;
+        forceRender(s => !s);
+    }
+
+    return [ref, updateState];
 }

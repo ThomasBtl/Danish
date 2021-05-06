@@ -11,8 +11,10 @@ import './Hand.css';
 export default function Hand(props){
     const handCards = props.cards;
     return(
-        <div ref={props.handRef} className='hand'>
-            {handCards}
+        <div className='hand-container'>
+            <div ref={props.handRef} className='hand'>
+                {handCards}
+            </div>
         </div>
     )
 }

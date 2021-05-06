@@ -15,14 +15,16 @@ export default function Card(props){
 
     const uniqueClassName = 'card card-' + props.uid;
     return(
-        <div 
-            ref={card}
-            onMouseDown={
-                props.onMouseDownHandler ? (e) => {props.onMouseDownHandler(e, card.current, positions)} : null
-            } 
-            className={uniqueClassName}
-        >
-            <p>Assets here</p>
+        <div className='card-container'>
+            <div 
+                ref={card}
+                onMouseDown={
+                    props.onMouseDownHandler ? (e) => {props.onMouseDownHandler(e, card.current, positions)} : null
+                } 
+                className={uniqueClassName}
+            >
+                <p className='asset'>Assets here</p>
+            </div>
         </div>
     )
 }

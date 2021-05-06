@@ -1,7 +1,18 @@
 .card{
     position:absolute;
-    height: 300px;
-    width: 216px; /*Card ratio 1 by 0.72*/
+    height: 300px; /*Change to responsive type*/
+    width: 216px; /*Card ratio 1 by 0.72*/ /*Change to responsive type*/
     border: 1px solid black;
     cursor: pointer;
+    background-color: red;
+}
+
+.asset{
+    display: inline-block;
+    position: relative;
+    width: auto;
+    margin: 0;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
